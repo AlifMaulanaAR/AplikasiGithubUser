@@ -1,6 +1,6 @@
 package com.example.aplikasigithubuser.data.remote
 
-import de.hdodenhof.circleimageview.BuildConfig
+import com.example.aplikasigithubuser.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

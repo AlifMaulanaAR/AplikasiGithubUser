@@ -6,11 +6,16 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.example.aplikasigithubuser.R
 import com.example.aplikasigithubuser.data.model.ResponseDetailUser
 import com.example.aplikasigithubuser.databinding.ActivityDetailBinding
+import com.example.aplikasigithubuser.detail.follow.FollowsFragment
 import com.example.aplikasigithubuser.utils.Result
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 
 class DetailActivity : AppCompatActivity() {
     private lateinit var binding:ActivityDetailBinding
@@ -24,7 +29,7 @@ class DetailActivity : AppCompatActivity() {
 
         val username = intent.getStringExtra("username") ?: ""
 
-        viewModel.resulDetailtUser.observe(this) {
+        viewModel.resultDetailUser.observe(this) {
             when (it) {
                 is Result.Success<*> -> {
                     val user = it.data as ResponseDetailUser
@@ -43,6 +48,42 @@ class DetailActivity : AppCompatActivity() {
             }
         }
         viewModel.getDetailUser(username)
+
+        val fragments = mutableListOf<Fragment>(
+            FollowsFragment.newInstance(FollowsFragment.FOLLOWERS),
+            FollowsFragment.newInstance(FollowsFragment.FOLLOWING)
+        )
+        val tittleFragments = mutableListOf(
+            getString(R.string.followers), getString(R.string.following),
+        )
+        val adapter = DetailAdapter(this,fragments)
+        binding.viewpager.adapter = adapter
+
+        TabLayoutMediator(binding.tab, binding.viewpager) { tab, posisi ->
+            tab.text = tittleFragments[posisi]
+        }.attach()
+
+
+        binding.tab.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(p0: TabLayout.Tab?) {
+                if (p0?.position == 0) {
+                    viewModel.getFollowers(username)
+                } else {
+                    viewModel.getFollowing(username)
+                }
+            }
+
+            override fun onTabUnselected(p0: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabReselected(p0: TabLayout.Tab?) {
+
+            }
+        })
+
+        viewModel.getFollowers(username)
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
