@@ -1,25 +1,32 @@
 package com.example.aplikasigithubuser.detail
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.aplikasigithubuser.R
+import com.example.aplikasigithubuser.data.local.DbModule
 import com.example.aplikasigithubuser.data.model.ResponseDetailUser
+import com.example.aplikasigithubuser.data.model.ResponseUserGithub
 import com.example.aplikasigithubuser.databinding.ActivityDetailBinding
 import com.example.aplikasigithubuser.detail.follow.FollowsFragment
 import com.example.aplikasigithubuser.utils.Result
-import com.google.android.material.tabs.TabLayout
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayoutMediator
 
 class DetailActivity : AppCompatActivity() {
     private lateinit var binding:ActivityDetailBinding
-    private val viewModel by viewModels<DetailViewModel>()
+    private val viewModel by viewModels<DetailViewModel> {
+        DetailViewModel.Factory(DbModule(this))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +34,8 @@ class DetailActivity : AppCompatActivity() {
         setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val username = intent.getStringExtra("username") ?: ""
+        val item = intent.getParcelableExtra<ResponseUserGithub.Item>("item")
+        val username = item?.login ?: ""
 
         viewModel.resultDetailUser.observe(this) {
             when (it) {
@@ -38,6 +46,11 @@ class DetailActivity : AppCompatActivity() {
                     }
 
                     binding.nama.text = user.name
+                    binding.username.text = user.login
+                    binding.followersCount.text =
+                        getString(R.string.followers_count, user.followers)
+                    binding.followingCount.text =
+                        getString(R.string.following_count,user.following)
                 }
                 is Result.Error -> {
                     Toast.makeText(this, it.exception.message.toString(), Toast.LENGTH_SHORT).show()
@@ -50,8 +63,8 @@ class DetailActivity : AppCompatActivity() {
         viewModel.getDetailUser(username)
 
         val fragments = mutableListOf<Fragment>(
-            FollowsFragment.newInstance(FollowsFragment.FOLLOWERS),
-            FollowsFragment.newInstance(FollowsFragment.FOLLOWING)
+            FollowsFragment.newInstance(FollowsFragment.FOLLOWERS, username),
+            FollowsFragment.newInstance(FollowsFragment.FOLLOWING, username)
         )
         val tittleFragments = mutableListOf(
             getString(R.string.followers), getString(R.string.following),
@@ -63,28 +76,24 @@ class DetailActivity : AppCompatActivity() {
             tab.text = tittleFragments[posisi]
         }.attach()
 
+        viewModel.resultSuksesFavorite.observe(this) {
+            binding.btnFavorite.changeIconColor(R.color.red)
+        }
 
-        binding.tab.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(p0: TabLayout.Tab?) {
-                if (p0?.position == 0) {
-                    viewModel.getFollowers(username)
-                } else {
-                    viewModel.getFollowing(username)
-                }
-            }
+        viewModel.resultDeleteFavorite.observe(this) {
+            binding.btnFavorite.changeIconColor(R.color.white)
+        }
 
-            override fun onTabUnselected(p0: TabLayout.Tab?) {
+        binding.btnFavorite.setOnClickListener {
+            viewModel.setFavorite(item)
+        }
 
-            }
-
-            override fun onTabReselected(p0: TabLayout.Tab?) {
-
-            }
-        })
-
-        viewModel.getFollowers(username)
-
+        viewModel.findFavorite(item?.id ?: 0) {
+            binding.btnFavorite.changeIconColor(R.color.red)
+        }
     }
+
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
@@ -94,4 +103,8 @@ class DetailActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+}
+
+fun FloatingActionButton.changeIconColor(@ColorRes color: Int) {
+    imageTintList = ColorStateList.valueOf(ContextCompat.getColor(this.context, color))
 }

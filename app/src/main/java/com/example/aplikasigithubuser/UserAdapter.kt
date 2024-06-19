@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import coil.transform.CircleCropTransformation
 import com.example.aplikasigithubuser.data.model.ResponseUserGithub
 import com.example.aplikasigithubuser.databinding.ItemUserBinding
 
@@ -13,17 +12,15 @@ class UserAdapter (private val data:MutableList<ResponseUserGithub.Item> = mutab
 ) :
     RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
-        fun setData(data: MutableList<ResponseUserGithub.Item>) {
-            this.data.clear()
-            this.data.addAll(data)
-            notifyDataSetChanged()
-        }
+    fun setData(data: Any?) {
+        this.data.clear()
+        this.data.addAll(data as Collection<ResponseUserGithub.Item>)
+        notifyDataSetChanged()
+    }
 
-    class UserViewHolder(private val v:ItemUserBinding) : RecyclerView.ViewHolder(v.root) {
+    class UserViewHolder(private val v: ItemUserBinding) : RecyclerView.ViewHolder(v.root) {
         fun bind(item: ResponseUserGithub.Item) {
-            v.image.load(item.avatar_url) {
-                transformations(CircleCropTransformation())
-            }
+            v.image.load(item.avatar_url)
 
             v.username.text = item.login
         }

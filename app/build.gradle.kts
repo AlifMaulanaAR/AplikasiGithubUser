@@ -18,6 +18,7 @@ android {
         versionName = "1.0"
 
         buildConfigField("String", "API_URL", "\"https://api.github.com/\"")
+        buildConfigField("String", "TOKEN", "\"token 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\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,11 +49,12 @@ android {
 
 dependencies {
 
+    val room_version = "2.4.2"
+    val lifecycle_version = "2.5.0-alpha04"
 
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.activity)
-    val lifecycle_version = "2.5.0-alpha04"
 
     kapt(libs.androidx.room.compiler)
 
@@ -76,6 +78,10 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
 
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler.v242)
+    implementation(libs.androidx.room.rxjava3)
+
     implementation(libs.circleimageview)
 
     implementation(libs.androidx.core.ktx.v190)
@@ -91,4 +97,7 @@ dependencies {
     implementation (libs.androidx.datastore.preferences)
 
     implementation (libs.androidx.core.ktx.v170)
+
+    implementation (libs.androidx.datastore.preferences.core)
+    implementation (libs.androidx.datastore.preferences)
 }

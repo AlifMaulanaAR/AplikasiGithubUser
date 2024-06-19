@@ -25,6 +25,7 @@ class FollowsFragment : Fragment() {
     }
     private val viewModel by activityViewModels<DetailViewModel>()
     var type = 6
+    private var username: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,19 +48,22 @@ class FollowsFragment : Fragment() {
         when(type) {
             FOLLOWERS -> {
                 viewModel.resultFollowersUser.observe(viewLifecycleOwner, this::manageResultFollows)
+                viewModel.getFollowers(username ?: "")
             }
 
             FOLLOWING -> {
                 viewModel.resultFollowingUser.observe(viewLifecycleOwner, this::manageResultFollows)
+                viewModel.getFollowing(username ?: "")
             }
         }
 
     }
 
-    private fun manageResultFollows(state: Result) {
+    private fun manageResultFollows(state: Result<MutableList<ResponseUserGithub.Item>>)
+    {
         when (state) {
-            is Result.Success<*> -> {
-                adapter.setData(state.data as MutableList<ResponseUserGithub.Item>)
+            is Result.Success -> {
+                adapter.setData(state.data)
             }
             is Result.Error -> {
                 Toast.makeText(
@@ -77,9 +81,10 @@ class FollowsFragment : Fragment() {
     companion object {
         const val FOLLOWING = 100
         const val FOLLOWERS = 101
-        fun newInstance(type: Int) = FollowsFragment()
+        fun newInstance(type: Int, username: String) = FollowsFragment()
             .apply {
                 this.type = type
+                this.username = username
             }
     }
 }

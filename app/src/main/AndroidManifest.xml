@@ -16,9 +16,17 @@
         android:theme="@style/Theme.AplikasiGithubUser"
         tools:targetApi="31">
         <activity
+            android:name=".setting.SettingActivity"
+            android:exported="false"
+            android:label="@string/setting"/>
+        <activity
+            android:name=".favorite.FavoriteActivity"
+            android:exported="false"
+            android:label="@string/favorite" />
+        <activity
             android:name=".detail.DetailActivity"
             android:exported="false"
-            android:label="@string/detail"/>
+            android:label="@string/Detail" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
